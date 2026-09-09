@@ -247,3 +247,11 @@ footer b{color:#7c8491}
 #clear-search{min-height:44px;padding:8px 10px;border:1px solid #4b5260;border-radius:5px;background:#242832;color:#e5eaf2;white-space:nowrap}
 #clear-search:hover{background:#353d4b}
 .search-meta{align-items:center;flex-wrap:wrap}
+
+.card-head>.card-heading-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.card-clone{min-height:48px;min-width:72px;padding:10px;border:1px solid #555f70;border-radius:5px;background:#292f39;color:#edf2fa;font-size:.75rem;font-weight:700;touch-action:manipulation}
+.card-clone:hover{background:#3b4656;border-color:#acbad0}
+
+.dice-launcher>.icon{width:24px;height:24px}
+.mini-torch .torch-flame{width:22px;height:24px}
+@media(max-width:680px){.mini-torch .torch-flame{width:20px;height:22px}}

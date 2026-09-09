@@ -98,17 +98,18 @@
     const preview = e.target.closest('[data-preview]');
     if (preview) { const el=$('preview-'+preview.dataset.preview); el.hidden=!el.hidden; preview.setAttribute('aria-expanded',String(!el.hidden)); }
     const pin = e.target.closest('[data-pin]');
-    if (pin) {
-      const index = Number(pin.dataset.pin), monster = D.MONSTERS[index];
-      const knownCopies = [...combatants,...removedCombatants.values()];
-      const ordinal = Math.max(0,...knownCopies.filter(c=>c.monsterIndex===index).map(c=>c.ordinal)) + 1;
-      const id = globalThis.crypto?.randomUUID?.() || `c${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-      const c = C.makeCombatant(monster,index,id,ordinal);
-      combatants.push(c);
-      $('combat-cards').insertAdjacentHTML('beforeend',cardHTML(c));
-      save(); syncCombatCount(); notice(`${C.monsterName(monster.name)} ${ordinal} · anclado a la mesa`);
-    }
+    if (pin) addCombatant(Number(pin.dataset.pin));
   });
+  function addCombatant(index) {
+    const monster=D.MONSTERS[index];
+    const knownCopies=[...combatants,...removedCombatants.values()];
+    const ordinal=Math.max(0,...knownCopies.filter(c=>c.monsterIndex===index).map(c=>c.ordinal))+1;
+    const id=globalThis.crypto?.randomUUID?.() || `c${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    const c=C.makeCombatant(monster,index,id,ordinal);
+    combatants.push(c);
+    $('combat-cards').insertAdjacentHTML('beforeend',cardHTML(c));
+    save();syncCombatCount();notice(`${C.monsterName(monster.name)} ${ordinal} · anclado a la mesa`);
+  }
   function cardHTML(c) {
     const m=D.MONSTERS[c.monsterIndex],name=C.monsterName(m.name),health=C.healthState(c.hp,m.pg);
     const target=esc(`${name} ${c.ordinal}`);
@@ -116,7 +117,7 @@
     const input=(stat,label,value)=>`<input id="${esc(c.id)}-${stat}" data-edit="${stat}" type="number" inputmode="numeric" min="0" max="99999" step="1" value="${value}" aria-label="${label} de ${target}">`;
     return `<article class="combat-card ${health}" data-combatant="${esc(c.id)}" data-hp-digits="${String(c.hp).length}" aria-label="${target}">
       <div class="card-overview">
-        <header class="card-head"><div><h3>${esc(name)} <span class="count-badge">${c.ordinal}</span></h3><p class="card-status">Nivel ${esc(m.nv)} · ${esc(alignment(m.al))} · ${esc(m.mv)}</p></div><button type="button" class="card-remove" data-remove="${esc(c.id)}" aria-label="Cerrar ficha de ${target}" title="Cerrar ficha">×</button></header>
+        <header class="card-head"><div><h3>${esc(name)} <span class="count-badge">${c.ordinal}</span></h3><p class="card-status">Nivel ${esc(m.nv)} · ${esc(alignment(m.al))} · ${esc(m.mv)}</p></div><div class="card-heading-actions"><button type="button" class="card-clone" data-clone aria-label="Clonar ${target} con sus PG iniciales" title="Añadir otra criatura con sus PG iniciales">Clonar</button><button type="button" class="card-remove" data-remove="${esc(c.id)}" aria-label="Cerrar ficha de ${target}" title="Cerrar ficha">×</button></div></header>
         <div class="armor-control"><span class="armor-label">Clase de armadura</span><strong class="armor-value" aria-label="Clase de armadura: ${esc(m.ca)}">${esc(m.ca)}</strong></div>
         <div class="stat-control hp-control"><div class="hp-label-row"><label for="${esc(c.id)}-hp">Puntos de golpe</label><span class="hp-condition">${health==='defeated'?'Fuera de combate':health==='wounded'?'Herido':''}</span></div><div class="stepper hp-stepper">${stepButton('hp',-1,c.hp)}<div class="hp-reading">${input('hp','Puntos de golpe',c.hp)}<span>de ${esc(m.pg)} PG</span></div>${stepButton('hp',1,c.hp)}</div></div>
       </div>
@@ -188,6 +189,7 @@
     }
     const card=e.target.closest('.combat-card');if(!card)return;
     const c=combatants.find(c=>c.id===card.dataset.combatant);if(!c)return;
+    if(e.target.closest('[data-clone]')){addCombatant(c.monsterIndex);return;}
     const btn=e.target.closest('[data-stat]');
     if(btn)updateCombatant(card,btn.dataset.stat,c[btn.dataset.stat]+Number(btn.dataset.delta));
   });
