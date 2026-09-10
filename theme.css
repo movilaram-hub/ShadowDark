@@ -255,3 +255,15 @@ footer b{color:#7c8491}
 .dice-launcher>.icon{width:24px;height:24px}
 .mini-torch .torch-flame{width:22px;height:24px}
 @media(max-width:680px){.mini-torch .torch-flame{width:20px;height:22px}}
+
+.bestiary>.panel-heading{flex-wrap:wrap;gap:12px}
+.bestiary-heading-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:12px;margin-left:auto}
+.browse-monsters,.bestiary-pagination button{min-height:48px;padding:10px 13px;background:#262c36;border:1px solid #515d70;border-radius:5px;color:#edf2fa;font-size:.75rem;font-weight:700}
+.browse-monsters:hover,.bestiary-pagination button:hover:not(:disabled){background:#3b4657;border-color:#9daec6}
+.browse-monsters[aria-expanded="true"]{border-color:#a7b5c9}
+.bestiary-order{display:flex;align-items:center;gap:8px;margin:0;font-size:.7rem}
+.bestiary-order select{width:auto;max-width:100%;min-height:44px;font-size:.75rem;padding:9px}
+#search-meta{gap:12px;scroll-margin-top:190px}
+.bestiary-pagination{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;padding-top:18px}
+#bestiary-page{font-size:.75rem;color:#bdc8d8;white-space:nowrap}
+@media(max-width:680px){.bestiary-pagination{gap:8px}.bestiary-pagination button{flex:1;padding:10px 8px}.bestiary-order{flex-wrap:wrap}.bestiary-order select{max-width:100%}}

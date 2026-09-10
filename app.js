@@ -60,7 +60,8 @@
   // BESTIARIO: solo busca en las criaturas originales; nunca en resultados de tablas.
   $('monster-count').textContent = `${D.MONSTERS.length} criaturas`;
   const sortedMonsters = D.MONSTERS.map((monster,index)=>({...monster,index})).sort((a,b)=>C.monsterName(a.name).localeCompare(C.monsterName(b.name),'es'));
-  let searchLimit = 8;
+  const pageSize = 20;
+  let browseOpen = false, searchPage = 1;
   const alignment = value => ({L:'Legal',N:'Neutral',C:'Caótico'}[value] || value);
   function abilityStats(m) {
     return `<div class="ability-stats">${[['FUE',m.f],['DES',m.d],['CON',m.c],['INT',m.i],['SAB',m.s],['CAR',m.ca_mod]].map(([name,value])=>`<span><small>${name}</small>${esc(value)}</span>`).join('')}</div>`;
@@ -70,30 +71,51 @@
   }
   function renderSearch() {
     const query = $('monster-search').value.trim();
-    $('search-meta').hidden = !query;
-    $('search-results').hidden = !query;
-    if(!query){
+    const open=browseOpen||Boolean(query);
+    $('browse-monsters').textContent=browseOpen?'Cerrar listado':'Ver listado';
+    $('browse-monsters').setAttribute('aria-expanded',String(open));
+    $('search-meta').hidden=!open;
+    $('search-results').hidden=!open;
+    $('clear-search').hidden=!open;
+    if(!open){
       $('search-results').innerHTML='';
       $('search-summary').textContent='';
-      $('clear-search').hidden=true;
-      $('more-monsters').hidden=true;
       $('search-footer').hidden=true;
       return;
     }
-    const matches = C.searchMonsters(sortedMonsters,query);
-    const visible = matches.slice(0,searchLimit);
-    $('clear-search').hidden = !query;
-    $('search-summary').textContent = `${matches.length} ${matches.length===1?'coincidencia':'coincidencias'}`;
-    $('more-monsters').hidden = matches.length <= searchLimit;
-    $('search-footer').hidden = matches.length <= searchLimit;
+    const matches=C.searchMonsters(sortedMonsters,query);
+    if($('monster-order').value==='level')matches.sort((a,b)=>Number(a.nv)-Number(b.nv)||C.monsterName(a.name).localeCompare(C.monsterName(b.name),'es'));
+    const pages=Math.max(1,Math.ceil(matches.length/pageSize));
+    searchPage=Math.max(1,Math.min(searchPage,pages));
+    const offset=(searchPage-1)*pageSize;
+    const visible=matches.slice(offset,offset+pageSize);
+    $('search-summary').textContent=matches.length?`${offset+1}–${offset+visible.length} de ${matches.length} criaturas`:'Sin coincidencias';
+    $('search-footer').hidden=pages<=1;
+    $('bestiary-page').textContent=`Página ${searchPage} de ${pages}`;
+    $('bestiary-prev').disabled=searchPage===1;
+    $('bestiary-next').disabled=searchPage===pages;
     $('search-results').innerHTML = visible.length ? visible.map(m=>{
       const name = C.monsterName(m.name);
       return `<article class="monster-row"><div class="monster-row-main"><button class="monster-name-button" data-preview="${m.index}" aria-expanded="false" aria-controls="preview-${m.index}" aria-label="Ver ficha de ${esc(name)}"><span class="monster-initial" aria-hidden="true">${esc(name.charAt(0))}</span><span class="monster-name-text"><strong>${esc(name)}</strong><small>Nivel ${esc(m.nv)} · ${esc(alignment(m.al))}</small></span></button><div class="monster-row-stats"><span><small>CA</small>${esc(m.ca)}</span><span><small>PG</small>${esc(m.pg)}</span></div><button class="pin-button" data-pin="${m.index}" aria-label="Anclar ${esc(name)}">${icon('pin')}<span>Anclar</span></button></div><div id="preview-${m.index}" class="monster-preview" hidden><p>${esc(m.desc)}</p>${abilityStats(m)}<p><strong>CA</strong> ${esc(m.ca)} · <strong>PG</strong> ${esc(m.pg)} · <strong>Movimiento</strong> ${esc(m.mv)}</p><p><strong>Ataque.</strong> ${esc(m.atq)}</p>${traitsHTML(m)}</div></article>`;
     }).join('') : '<p class="search-no-results">No hay criaturas con ese nombre. Prueba en español o en inglés.</p>';
   }
-  $('monster-search').addEventListener('input',()=>{searchLimit=8;renderSearch();});
-  $('clear-search').addEventListener('click',()=>{$('monster-search').value='';searchLimit=8;renderSearch();$('monster-search').focus();});
-  $('more-monsters').addEventListener('click',()=>{searchLimit+=12;renderSearch();});
+  function closeBestiary() {
+    browseOpen=false;searchPage=1;$('monster-search').value='';renderSearch();
+  }
+  $('monster-search').addEventListener('input',()=>{searchPage=1;renderSearch();});
+  $('clear-search').addEventListener('click',()=>{closeBestiary();$('monster-search').focus();});
+  $('browse-monsters').addEventListener('click',()=>{
+    if(browseOpen){closeBestiary();return;}
+    browseOpen=true;searchPage=1;$('monster-search').value='';renderSearch();
+  });
+  $('monster-order').addEventListener('change',()=>{searchPage=1;renderSearch();});
+  function changeBestiaryPage(delta){
+    searchPage+=delta;renderSearch();
+    $('search-meta').scrollIntoView({block:'start',behavior:'instant'});
+    $('search-results').querySelector('button')?.focus({preventScroll:true});
+  }
+  $('bestiary-prev').addEventListener('click',()=>changeBestiaryPage(-1));
+  $('bestiary-next').addEventListener('click',()=>changeBestiaryPage(1));
   $('search-results').addEventListener('click',e=>{
     const preview = e.target.closest('[data-preview]');
     if (preview) { const el=$('preview-'+preview.dataset.preview); el.hidden=!el.hidden; preview.setAttribute('aria-expanded',String(!el.hidden)); }

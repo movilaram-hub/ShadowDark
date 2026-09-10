@@ -62,11 +62,11 @@
         <div class="workspace-grid">
           <div class="main-column">
             <section class="panel bestiary" aria-labelledby="bestiary-title">
-              <div class="panel-heading"><h2 id="bestiary-title"><svg class="icon"><use href="#i-book"/></svg>Bestiario</h2><span id="monster-count" class="quiet-badge"></span></div>
+              <div class="panel-heading"><h2 id="bestiary-title"><svg class="icon"><use href="#i-book"/></svg>Bestiario</h2><div class="bestiary-heading-actions"><span id="monster-count" class="quiet-badge"></span><button id="browse-monsters" class="browse-monsters" type="button" aria-expanded="false" aria-controls="search-results">Ver listado</button></div></div>
               <div class="search-box"><svg class="icon"><use href="#i-search"/></svg><input id="monster-search" type="search" autocomplete="off" placeholder="Busca un monstruo… goblin, dragón, esqueleto" aria-label="Buscar monstruos por nombre en español o inglés"><kbd>/</kbd></div>
-              <div id="search-meta" class="search-meta" hidden><span id="search-summary" role="status"></span><button id="clear-search" class="text-button" hidden>× Cerrar resultados</button></div>
+              <div id="search-meta" class="search-meta" hidden><label class="bestiary-order" for="monster-order">Ordenar<select id="monster-order"><option value="name">Nombre · A–Z</option><option value="level">Nivel · menor a mayor</option></select></label><span id="search-summary" role="status"></span><button id="clear-search" class="text-button" hidden>× Cerrar resultados</button></div>
               <div id="search-results" class="search-results" hidden></div>
-              <div id="search-footer" class="search-footer" hidden><button id="more-monsters" class="text-button" hidden>Mostrar más criaturas</button></div>
+              <nav id="search-footer" class="search-footer bestiary-pagination" aria-label="Páginas del bestiario" hidden><button id="bestiary-prev" type="button">← Anterior</button><span id="bestiary-page"></span><button id="bestiary-next" type="button">Siguiente →</button></nav>
             </section>
             <section class="combat-section" aria-labelledby="combat-title">
               <div class="combat-heading"><h2 id="combat-title"><svg class="icon"><use href="#i-pin"/></svg>En la mesa <span id="combat-count" class="count-badge">0</span></h2><span class="muted small">Fichas de combate</span></div>
